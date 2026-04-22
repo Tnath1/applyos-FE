@@ -18,7 +18,6 @@ export function NotesPage() {
         }
         eyebrow="Notes"
         title="Search notes"
-        description="Interview prep, negotiation points, application retros, and company-specific context."
       />
       <div className="grid gap-4 p-4 sm:p-6 xl:grid-cols-2">
         {notes.map((note) => (

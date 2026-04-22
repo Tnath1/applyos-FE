@@ -31,7 +31,6 @@ export function SettingsPage() {
       <PageHeader
         eyebrow="Settings"
         title="Workspace settings"
-        description="Frontend placeholder for account, notification, and backend connection settings."
       />
       <div className="grid gap-4 p-4 sm:p-6 xl:grid-cols-2">
         {settingsItems.map((item) => (

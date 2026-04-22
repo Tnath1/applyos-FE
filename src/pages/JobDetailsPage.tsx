@@ -15,7 +15,7 @@ export function JobDetailsPage() {
   if (!job) {
     return (
       <>
-        <PageHeader eyebrow="Job Details" title="Job not found" description="The selected application could not be found." />
+        <PageHeader eyebrow="Job Details" title="Job not found" />
         <div className="p-4 sm:p-6">
           <Link className="text-sm font-medium text-blue-700 hover:text-blue-900" to="/jobs">
             Back to jobs
@@ -45,17 +45,19 @@ export function JobDetailsPage() {
         }
         eyebrow="Job Details"
         title={job.roleTitle}
-        description={`${job.company} / ${job.location} / ${job.workplace}`}
       />
       <div className="grid gap-6 p-4 sm:p-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="space-y-6">
-          <Link className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-950" to="/jobs">
-            <ArrowLeft className="size-4" aria-hidden="true" />
-            Back to jobs
-          </Link>
+        <Card className="overflow-hidden">
+          <div className="border-b border-slate-200 p-5">
+            <Link
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-950"
+              to="/jobs"
+            >
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              Back to jobs
+            </Link>
 
-          <Card className="p-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="mt-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <JobStatusBadge status={job.status} />
@@ -95,9 +97,9 @@ export function JobDetailsPage() {
                 {job.source}
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-5">
+          <section className="border-b border-slate-200 p-5">
             <h2 className="text-base font-semibold text-slate-950">Relevant keywords</h2>
             <p className="mt-1 text-sm text-slate-500">Terms to keep aligned across resume, notes, and interview prep.</p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -107,9 +109,9 @@ export function JobDetailsPage() {
                 </Badge>
               ))}
             </div>
-          </Card>
+          </section>
 
-          <Card className="p-5">
+          <section className="border-b border-slate-200 p-5">
             <h2 className="text-base font-semibold text-slate-950">About the job</h2>
             <p className="mt-4 text-sm leading-7 text-slate-700">{job.description}</p>
             <div className="mt-6">
@@ -123,9 +125,9 @@ export function JobDetailsPage() {
                 ))}
               </ul>
             </div>
-          </Card>
+          </section>
 
-          <Card className="p-5">
+          <section className="p-5">
             <h2 className="text-base font-semibold text-slate-950">Pipeline timeline</h2>
             <div className="mt-5 space-y-4">
               {job.stageHistory.map((event) => (
@@ -138,8 +140,8 @@ export function JobDetailsPage() {
                 </div>
               ))}
             </div>
-          </Card>
-        </div>
+          </section>
+        </Card>
 
         <JobDetailSidePanel job={job} notes={jobNotes} reminders={jobReminders} resume={attachedResume} />
       </div>

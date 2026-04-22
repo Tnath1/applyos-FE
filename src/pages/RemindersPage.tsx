@@ -12,7 +12,6 @@ export function RemindersPage() {
       <PageHeader
         eyebrow="Reminders"
         title="Follow-up queue"
-        description="Track overdue, upcoming, and completed reminders across applications."
       />
       <div className="grid gap-6 p-4 sm:p-6 xl:grid-cols-3">
         {sections.map((section) => {

@@ -40,7 +40,6 @@ export function JobTrackerPage() {
         }
         eyebrow="Job Tracker"
         title="Applications"
-        description="Search, filter, and review every role in the current pipeline."
       />
       <div className="space-y-4 p-4 sm:p-6">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
