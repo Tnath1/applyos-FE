@@ -26,7 +26,6 @@ export function DashboardPage() {
       <PageHeader
         eyebrow="Dashboard"
         title="Today's search overview"
-        description="A quick read on active roles, open follow-ups, and recent movement across the pipeline."
       />
       <div className="space-y-6 p-4 sm:p-6">
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

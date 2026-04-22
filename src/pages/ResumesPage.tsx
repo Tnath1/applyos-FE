@@ -10,7 +10,6 @@ export function ResumesPage() {
       <PageHeader
         eyebrow="My Resumes"
         title="Resume library"
-        description="Keep focused resume variants ready to attach to each application."
       />
       <div className="grid gap-4 p-4 sm:p-6 xl:grid-cols-3">
         <Card className="flex min-h-64 items-center justify-center border-dashed p-6 text-center">
