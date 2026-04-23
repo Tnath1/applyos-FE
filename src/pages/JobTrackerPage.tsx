@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { PageHeader } from '../components/ui/PageHeader'
 import { AddJobModal } from '../features/jobs/AddJobModal'
 import { JobBoard } from '../features/jobs/JobBoard'
+import { JobEmptyState } from '../features/jobs/JobEmptyState'
 import { JobStatusFilter } from '../features/jobs/JobStatusFilter'
 import { JobTable } from '../features/jobs/JobTable'
 import { useWorkspace } from '../features/workspace/WorkspaceProvider'
@@ -88,7 +89,11 @@ export function JobTrackerPage() {
         </div>
 
         {view === 'table' ? (
-          <JobTable jobs={filteredJobs} onStatusChange={updateJobStatus} />
+          <JobTable
+            emptyState={<JobEmptyState query={query} status={status} />}
+            jobs={filteredJobs}
+            onStatusChange={updateJobStatus}
+          />
         ) : (
           <JobBoard jobs={filteredJobs} onStatusChange={updateJobStatus} />
         )}

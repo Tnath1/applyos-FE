@@ -8,11 +8,13 @@ import { formatDate } from '../../utils/format'
 interface JobDetailSidePanelProps {
   job: Job
   resume?: Resume
+  resumes?: Resume[]
   notes: Note[]
   reminders: Reminder[]
+  onResumeChange?: (resumeId: string) => void
 }
 
-export function JobDetailSidePanel({ job, resume, notes, reminders }: JobDetailSidePanelProps) {
+export function JobDetailSidePanel({ job, resume, resumes = [], notes, reminders, onResumeChange }: JobDetailSidePanelProps) {
   return (
     <aside className="space-y-4">
       <Card className="p-4">
@@ -32,6 +34,26 @@ export function JobDetailSidePanel({ job, resume, notes, reminders }: JobDetailS
         ) : (
           <p className="mt-3 text-sm text-slate-500">No resume attached.</p>
         )}
+        {onResumeChange ? (
+          <label className="mt-4 block">
+            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              {resume ? 'Replace resume' : 'Attach resume'}
+            </span>
+            <select
+              className="mt-2 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200/60"
+              disabled={resumes.length === 0}
+              onChange={(event) => onResumeChange(event.target.value)}
+              value={job.resumeId}
+            >
+              <option value="">No resume selected</option>
+              {resumes.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} ({item.version})
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
       </Card>
 
       <Card className="p-4">

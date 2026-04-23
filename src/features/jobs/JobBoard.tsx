@@ -40,9 +40,13 @@ function BoardColumn({ jobs, status }: { jobs: Job[]; status: JobStatus }) {
         <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">{jobs.length}</span>
       </div>
       <div className="space-y-3">
-        {jobs.map((job) => (
-          <BoardCard job={job} key={job.id} />
-        ))}
+        {jobs.length > 0 ? (
+          jobs.map((job) => <BoardCard job={job} key={job.id} />)
+        ) : (
+          <div className="rounded-md border border-dashed border-slate-200 bg-slate-50/70 px-3 py-8 text-center text-sm leading-6 text-slate-500">
+            No {statusLabels[status].toLowerCase()} jobs.
+          </div>
+        )}
       </div>
     </section>
   )

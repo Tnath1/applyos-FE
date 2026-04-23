@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { activityTimeline as initialActivity, jobs as initialJobs } from '../../mock'
-import type { ActivityTimelineItem, DashboardStat, Job, JobStatus } from '../../types'
+import { activityTimeline as initialActivity, jobs as initialJobs, resumes as initialResumes } from '../../mock'
+import type { ActivityTimelineItem, DashboardStat, Job, JobStatus, Resume } from '../../types'
 import { statusLabels } from '../../utils/format'
 
 interface NewJobInput {
@@ -16,17 +16,29 @@ interface NewJobInput {
   description: string
 }
 
+interface NewResumeInput {
+  name: string
+  roleFocus: string
+  fileType: Resume['fileType']
+  version: string
+  keywords: string[]
+}
+
 interface WorkspaceContextValue {
   jobs: Job[]
+  resumes: Resume[]
   activityTimeline: ActivityTimelineItem[]
   dashboardStats: DashboardStat[]
   addJob: (input: NewJobInput) => Job
+  addResume: (input: NewResumeInput) => Resume
+  attachResumeToJob: (jobId: string, resumeId: string) => void
   updateJobStatus: (jobId: string, status: JobStatus) => void
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null)
 
 const jobsStorageKey = 'applyos.jobs.v1'
+const resumesStorageKey = 'applyos.resumes.v1'
 const activityStorageKey = 'applyos.activity.v1'
 
 function today() {
@@ -110,6 +122,7 @@ function createDashboardStats(jobs: Job[]): DashboardStat[] {
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [jobs, setJobs] = useState<Job[]>(() => readStoredValue(jobsStorageKey, initialJobs))
+  const [resumes, setResumes] = useState<Resume[]>(() => readStoredValue(resumesStorageKey, initialResumes))
   const [activityTimeline, setActivityTimeline] = useState<ActivityTimelineItem[]>(() =>
     readStoredValue(activityStorageKey, initialActivity),
   )
@@ -117,6 +130,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem(jobsStorageKey, JSON.stringify(jobs))
   }, [jobs])
+
+  useEffect(() => {
+    window.localStorage.setItem(resumesStorageKey, JSON.stringify(resumes))
+  }, [resumes])
 
   useEffect(() => {
     window.localStorage.setItem(activityStorageKey, JSON.stringify(activityTimeline))
@@ -172,6 +189,71 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     return newJob
   }
 
+  function addResume(input: NewResumeInput) {
+    const createdAt = today()
+    const newResume: Resume = {
+      id: createId('resume'),
+      name: input.name,
+      roleFocus: input.roleFocus,
+      fileType: input.fileType,
+      updatedAt: createdAt,
+      version: input.version || 'v1.0',
+      matchScore: 80,
+      keywords: input.keywords,
+    }
+
+    setResumes([newResume, ...resumes])
+    setActivityTimeline([
+      {
+        id: createId('activity'),
+        type: 'resume',
+        title: `${newResume.name} added`,
+        description: `${newResume.fileType} resume variant was added to the library.`,
+        createdAt,
+      },
+      ...activityTimeline,
+    ])
+
+    return newResume
+  }
+
+  function attachResumeToJob(jobId: string, resumeId: string) {
+    const jobToUpdate = jobs.find((job) => job.id === jobId)
+    const resumeToAttach = resumes.find((resume) => resume.id === resumeId)
+
+    if (!jobToUpdate || jobToUpdate.resumeId === resumeId) {
+      return
+    }
+
+    const changedAt = today()
+    const nextResumeName = resumeToAttach?.name ?? 'No resume'
+
+    setJobs(
+      jobs.map((job) =>
+        job.id === jobId
+          ? {
+              ...job,
+              resumeId,
+              lastActivity: resumeToAttach
+                ? `Attached ${resumeToAttach.name} on ${changedAt}`
+                : `Removed attached resume on ${changedAt}`,
+            }
+          : job,
+      ),
+    )
+    setActivityTimeline([
+      {
+        id: createId('activity'),
+        type: 'resume',
+        title: resumeToAttach ? `${resumeToAttach.name} attached` : 'Resume detached',
+        description: `${nextResumeName} was selected for ${jobToUpdate.company} / ${jobToUpdate.roleTitle}.`,
+        createdAt: changedAt,
+        jobId,
+      },
+      ...activityTimeline,
+    ])
+  }
+
   function updateJobStatus(jobId: string, status: JobStatus) {
     const jobToUpdate = jobs.find((job) => job.id === jobId)
 
@@ -206,8 +288,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   }
 
   const value = useMemo(
-    () => ({ jobs, activityTimeline, dashboardStats, addJob, updateJobStatus }),
-    [activityTimeline, dashboardStats, jobs],
+    () => ({ jobs, resumes, activityTimeline, dashboardStats, addJob, addResume, attachResumeToJob, updateJobStatus }),
+    [activityTimeline, dashboardStats, jobs, resumes],
   )
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>

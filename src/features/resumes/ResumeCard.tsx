@@ -1,43 +1,49 @@
-import { FileText, MoreHorizontal } from 'lucide-react'
-import type { Resume } from '../../types'
-import { Badge } from '../../components/ui/Badge'
+import { Link } from 'react-router-dom'
+import type { Job, Resume } from '../../types'
 import { Card } from '../../components/ui/Card'
-import { IconButton } from '../../components/ui/IconButton'
-import { formatDate } from '../../utils/format'
+import { JobStatusBadge } from '../../components/ui/StatusBadge'
 
 interface ResumeCardProps {
   resume: Resume
+  jobs: Job[]
 }
 
-export function ResumeCard({ resume }: ResumeCardProps) {
+export function ResumeCard({ jobs, resume }: ResumeCardProps) {
+  const attachedJobs = jobs.filter((job) => job.resumeId === resume.id)
+
   return (
     <Card className="p-4">
-      <div className="flex items-start gap-3">
-        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600">
-          <FileText className="size-5" aria-hidden="true" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h3 className="font-semibold text-slate-950">{resume.name}</h3>
-              <p className="mt-1 text-sm leading-5 text-slate-500">{resume.roleFocus}</p>
-            </div>
-            <IconButton icon={MoreHorizontal} label="Resume actions" />
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Badge>{resume.fileType}</Badge>
-            <Badge tone="blue">{resume.version}</Badge>
-            <Badge tone="green">{resume.matchScore}% match</Badge>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {resume.keywords.map((keyword) => (
-              <span className="rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600" key={keyword}>
-                {keyword}
-              </span>
+      <h3 className="font-semibold text-slate-950">{resume.name}</h3>
+      <p className="mt-1 text-sm leading-5 text-slate-500">{resume.roleFocus}</p>
+
+      <div className="mt-5">
+        <h4 className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Used on jobs</h4>
+        {attachedJobs.length > 0 ? (
+          <div className="mt-3 space-y-2">
+            {attachedJobs.slice(0, 3).map((job) => (
+              <Link
+                className="block rounded-md border border-slate-200 p-3 transition hover:bg-slate-50"
+                key={job.id}
+                to={`/jobs/${job.id}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-slate-950">{job.company}</p>
+                    <p className="mt-1 text-xs text-slate-500">{job.roleTitle}</p>
+                  </div>
+                  <JobStatusBadge status={job.status} />
+                </div>
+              </Link>
             ))}
+            {attachedJobs.length > 3 ? (
+              <p className="text-xs text-slate-500">+{attachedJobs.length - 3} more jobs using this resume</p>
+            ) : null}
           </div>
-          <p className="mt-4 text-xs text-slate-500">Updated {formatDate(resume.updatedAt)}</p>
-        </div>
+        ) : (
+          <p className="mt-3 rounded-md border border-dashed border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-500">
+            No jobs attached yet. Attach this resume from a job detail page to start tracking outcomes.
+          </p>
+        )}
       </div>
     </Card>
   )
