@@ -6,7 +6,6 @@ import { JobTrackerPage } from '../pages/JobTrackerPage'
 import { NotesPage } from '../pages/NotesPage'
 import { RemindersPage } from '../pages/RemindersPage'
 import { ResumesPage } from '../pages/ResumesPage'
-import { SettingsPage } from '../pages/SettingsPage'
 
 const router = createBrowserRouter([
   {
@@ -20,7 +19,6 @@ const router = createBrowserRouter([
       { path: 'resumes', element: <ResumesPage /> },
       { path: 'reminders', element: <RemindersPage /> },
       { path: 'notes', element: <NotesPage /> },
-      { path: 'settings', element: <SettingsPage /> },
       { path: '*', element: <Navigate replace to="/dashboard" /> },
     ],
   },

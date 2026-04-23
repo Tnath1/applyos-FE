@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { useState } from 'react'
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { SelectMenu } from '../../components/ui/SelectMenu'
 import type { Job } from '../../types'
 
@@ -47,6 +48,7 @@ const priorityOptions: Array<{ label: string; value: Job['priority'] }> = [
 
 export function AddJobModal({ isOpen, onClose, onSubmit }: AddJobModalProps) {
   const [form, setForm] = useState(emptyForm)
+  useBodyScrollLock(isOpen)
 
   if (!isOpen) {
     return null

@@ -12,6 +12,77 @@ export interface DashboardStat {
   tone: 'neutral' | 'blue' | 'green' | 'amber' | 'red'
 }
 
+export interface UserProfile {
+  firstName: string
+  lastName: string
+  email: string
+  emailVerified: boolean
+  targetRole: string
+  headline: string
+  preferredLocations: string[]
+  workplacePreference: Job['workplace'] | 'Flexible'
+  salaryTarget: string
+  linkedInUrl: string
+  portfolioUrl: string
+  githubUrl: string
+  timeZone: string
+}
+
+export interface WorkspacePreferences {
+  defaultHome: '/dashboard' | '/jobs' | '/resumes' | '/notes'
+  trackerView: 'table' | 'board'
+  dateFormat: 'MMM D, YYYY' | 'DD MMM YYYY'
+  weeklyGoal: number
+  compactMode: boolean
+  autoOpenJobLinks: boolean
+}
+
+export interface AuthSession {
+  id: string
+  deviceName: string
+  location: string
+  lastActive: string
+  current: boolean
+}
+
+export interface SecuritySettings {
+  provider: 'Email + password' | 'Google SSO'
+  twoFactorEnabled: boolean
+  sessionTimeout: '15m' | '1h' | '8h' | '24h'
+  lastPasswordChange: string
+  sessions: AuthSession[]
+}
+
+export interface SubscriptionSettings {
+  plan: 'Free' | 'Pro'
+  billingCycle: 'monthly'
+  status: 'trialing' | 'active'
+  renewalDate: string
+  seats: number
+  features: string[]
+  billingDetails?: {
+    cardholderName: string
+    billingEmail: string
+    country: string
+    cardLast4: string
+  }
+}
+
+export interface IntegrationStatus {
+  id: string
+  label: string
+  status: 'connected' | 'available' | 'coming-soon'
+  description: string
+}
+
+export interface WorkspaceSettings {
+  profile: UserProfile
+  preferences: WorkspacePreferences
+  security: SecuritySettings
+  subscription: SubscriptionSettings
+  integrations: IntegrationStatus[]
+}
+
 export interface Resume {
   id: string
   name: string

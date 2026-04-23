@@ -1,6 +1,24 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { activityTimeline as initialActivity, jobs as initialJobs, notes as initialNotes, resumes as initialResumes } from '../../mock'
-import type { ActivityTimelineItem, DashboardStat, Job, JobStatus, Note, Resume } from '../../types'
+import {
+  activityTimeline as initialActivity,
+  jobs as initialJobs,
+  notes as initialNotes,
+  resumes as initialResumes,
+  settings as initialSettings,
+} from '../../mock'
+import type {
+  ActivityTimelineItem,
+  DashboardStat,
+  Job,
+  JobStatus,
+  Note,
+  Resume,
+  SecuritySettings,
+  SubscriptionSettings,
+  UserProfile,
+  WorkspacePreferences,
+  WorkspaceSettings,
+} from '../../types'
 import { statusLabels } from '../../utils/format'
 
 interface NewJobInput {
@@ -40,10 +58,17 @@ interface WorkspaceContextValue {
   notes: Note[]
   activityTimeline: ActivityTimelineItem[]
   dashboardStats: DashboardStat[]
+  settings: WorkspaceSettings
   addJob: (input: NewJobInput) => Job
   addResume: (input: NewResumeInput) => Resume
   addNote: (input: NewNoteInput) => Note
   updateNote: (noteId: string, input: NewNoteInput) => void
+  updateProfile: (input: UserProfile) => void
+  updatePreferences: (input: WorkspacePreferences) => void
+  updateSecurity: (input: Pick<SecuritySettings, 'twoFactorEnabled' | 'sessionTimeout'>) => void
+  updateSubscription: (input: SubscriptionSettings) => void
+  revokeSession: (sessionId: string) => void
+  resetWorkspaceData: () => void
   attachResumeToJob: (jobId: string, resumeId: string) => void
   updateJobStatus: (jobId: string, status: JobStatus) => void
 }
@@ -54,6 +79,7 @@ const jobsStorageKey = 'applyos.jobs.v1'
 const resumesStorageKey = 'applyos.resumes.v1'
 const notesStorageKey = 'applyos.notes.v1'
 const activityStorageKey = 'applyos.activity.v1'
+const settingsStorageKey = 'applyos.settings.v3'
 
 function today() {
   return new Date().toISOString().slice(0, 10)
@@ -141,6 +167,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [activityTimeline, setActivityTimeline] = useState<ActivityTimelineItem[]>(() =>
     readStoredValue(activityStorageKey, initialActivity),
   )
+  const [settings, setSettings] = useState<WorkspaceSettings>(() => readStoredValue(settingsStorageKey, initialSettings))
 
   useEffect(() => {
     window.localStorage.setItem(jobsStorageKey, JSON.stringify(jobs))
@@ -157,6 +184,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem(activityStorageKey, JSON.stringify(activityTimeline))
   }, [activityTimeline])
+
+  useEffect(() => {
+    window.localStorage.setItem(settingsStorageKey, JSON.stringify(settings))
+  }, [settings])
 
   const dashboardStats = useMemo(() => createDashboardStats(jobs), [jobs])
 
@@ -347,6 +378,54 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     ])
   }
 
+  function updateProfile(input: UserProfile) {
+    setSettings((currentSettings) => ({
+      ...currentSettings,
+      profile: input,
+    }))
+  }
+
+  function updatePreferences(input: WorkspacePreferences) {
+    setSettings((currentSettings) => ({
+      ...currentSettings,
+      preferences: input,
+    }))
+  }
+
+  function updateSecurity(input: Pick<SecuritySettings, 'twoFactorEnabled' | 'sessionTimeout'>) {
+    setSettings((currentSettings) => ({
+      ...currentSettings,
+      security: {
+        ...currentSettings.security,
+        ...input,
+      },
+    }))
+  }
+
+  function updateSubscription(input: SubscriptionSettings) {
+    setSettings((currentSettings) => ({
+      ...currentSettings,
+      subscription: input,
+    }))
+  }
+
+  function revokeSession(sessionId: string) {
+    setSettings((currentSettings) => ({
+      ...currentSettings,
+      security: {
+        ...currentSettings.security,
+        sessions: currentSettings.security.sessions.filter((session) => session.current || session.id !== sessionId),
+      },
+    }))
+  }
+
+  function resetWorkspaceData() {
+    setJobs(initialJobs)
+    setResumes(initialResumes)
+    setNotes(initialNotes)
+    setActivityTimeline(initialActivity)
+  }
+
   function attachResumeToJob(jobId: string, resumeId: string) {
     const jobToUpdate = jobs.find((job) => job.id === jobId)
     const resumeToAttach = resumes.find((resume) => resume.id === resumeId)
@@ -424,14 +503,21 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       notes,
       activityTimeline,
       dashboardStats,
+      settings,
       addJob,
       addResume,
       addNote,
       updateNote,
+      updateProfile,
+      updatePreferences,
+      updateSecurity,
+      updateSubscription,
+      revokeSession,
+      resetWorkspaceData,
       attachResumeToJob,
       updateJobStatus,
     }),
-    [activityTimeline, dashboardStats, jobs, notes, resumes],
+    [activityTimeline, dashboardStats, jobs, notes, resumes, settings],
   )
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>

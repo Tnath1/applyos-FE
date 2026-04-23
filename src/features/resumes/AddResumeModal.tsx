@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { useState } from 'react'
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import type { Resume } from '../../types'
 
 interface AddResumeModalProps {
@@ -30,6 +31,7 @@ const emptyForm = {
 
 export function AddResumeModal({ isOpen, onClose, onSubmit }: AddResumeModalProps) {
   const [form, setForm] = useState(emptyForm)
+  useBodyScrollLock(isOpen)
 
   if (!isOpen) {
     return null
