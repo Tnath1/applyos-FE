@@ -1,15 +1,18 @@
 import { ArrowUpRight, CalendarDays, MapPin, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Job } from '../../types'
+import type { JobStatus } from '../../types'
 import { formatDate } from '../../utils/format'
 import { Badge } from '../../components/ui/Badge'
 import { JobStatusBadge } from '../../components/ui/StatusBadge'
+import { JobStatusSelect } from './JobStatusSelect'
 
 interface JobTableProps {
   jobs: Job[]
+  onStatusChange?: (jobId: string, status: JobStatus) => void
 }
 
-export function JobTable({ jobs }: JobTableProps) {
+export function JobTable({ jobs, onStatusChange }: JobTableProps) {
   return (
     <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
       <div className="hidden overflow-x-auto md:block">
@@ -44,7 +47,11 @@ export function JobTable({ jobs }: JobTableProps) {
                   </div>
                 </td>
                 <td className="px-4 py-4">
-                  <JobStatusBadge status={job.status} />
+                  {onStatusChange ? (
+                    <JobStatusSelect onChange={(status) => onStatusChange(job.id, status)} value={job.status} />
+                  ) : (
+                    <JobStatusBadge status={job.status} />
+                  )}
                 </td>
                 <td className="px-4 py-4 text-sm text-slate-600">{formatDate(job.appliedDate)}</td>
                 <td className="px-4 py-4">

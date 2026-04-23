@@ -14,7 +14,11 @@ export const reminderStatusLabels: Record<ReminderStatus, string> = {
   completed: 'Completed',
 }
 
-export function formatDate(value: string) {
+export function formatDate(value: string | null | undefined) {
+  if (!value) {
+    return 'Not applied'
+  }
+
   return new Intl.DateTimeFormat('en', {
     month: 'short',
     day: 'numeric',
@@ -22,7 +26,11 @@ export function formatDate(value: string) {
   }).format(new Date(`${value}T12:00:00`))
 }
 
-export function formatShortDate(value: string) {
+export function formatShortDate(value: string | null | undefined) {
+  if (!value) {
+    return 'Saved'
+  }
+
   return new Intl.DateTimeFormat('en', {
     month: 'short',
     day: 'numeric',

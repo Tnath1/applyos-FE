@@ -1,25 +1,26 @@
-import { Bell, BriefcaseBusiness, CheckCircle2, CircleDashed, Clock, Trophy } from 'lucide-react'
+import { Bookmark, BriefcaseBusiness, CheckCircle2, CircleDashed, Clock, Trophy } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { PageHeader } from '../components/ui/PageHeader'
 import { JobStatusBadge } from '../components/ui/StatusBadge'
 import { StatCard } from '../features/dashboard/StatCard'
-import { activityTimeline, dashboardStats, jobs, reminders } from '../mock'
+import { useWorkspace } from '../features/workspace/WorkspaceProvider'
 import type { DashboardStat } from '../types'
 import { formatDate, formatShortDate } from '../utils/format'
 
 const statIcons: Record<DashboardStat['id'], typeof BriefcaseBusiness> = {
   'total-jobs': BriefcaseBusiness,
+  saved: Bookmark,
   applied: CircleDashed,
   interviewing: Clock,
   offers: Trophy,
   rejected: CheckCircle2,
-  'reminders-due': Bell,
 }
 
 export function DashboardPage() {
+  const { activityTimeline, dashboardStats, jobs } = useWorkspace()
   const activeJobs = jobs.filter((job) => job.status !== 'rejected')
-  const dueReminders = reminders.filter((reminder) => reminder.status !== 'completed').slice(0, 3)
+  const savedJobs = jobs.filter((job) => job.status === 'saved').slice(0, 4)
 
   return (
     <>
@@ -70,25 +71,31 @@ export function DashboardPage() {
           <Card className="p-5">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-base font-semibold text-slate-950">Follow-ups</h2>
-                <p className="mt-1 text-sm text-slate-500">Open reminders that need a decision.</p>
+                <h2 className="text-base font-semibold text-slate-950">Saved jobs</h2>
+                <p className="mt-1 text-sm text-slate-500">Roles waiting for review or application.</p>
               </div>
-              <Link className="text-sm font-medium text-blue-700 hover:text-blue-900" to="/reminders">
+              <Link className="text-sm font-medium text-blue-700 hover:text-blue-900" to="/jobs">
                 View all
               </Link>
             </div>
             <div className="mt-5 space-y-3">
-              {dueReminders.map((reminder) => {
-                const job = jobs.find((item) => item.id === reminder.jobId)
-
-                return (
-                  <div className="rounded-md border border-slate-200 p-3" key={reminder.id}>
-                    <p className="text-sm font-medium text-slate-950">{reminder.title}</p>
-                    <p className="mt-1 text-sm text-slate-500">{job ? job.company : 'General'}</p>
-                    <p className="mt-3 text-sm font-medium text-slate-700">{formatDate(reminder.dueDate)}</p>
-                  </div>
-                )
-              })}
+              {savedJobs.length > 0 ? (
+                savedJobs.map((job) => (
+                  <Link
+                    className="block rounded-md border border-slate-200 p-3 transition hover:bg-slate-50"
+                    key={job.id}
+                    to={`/jobs/${job.id}`}
+                  >
+                    <p className="text-sm font-medium text-slate-950">{job.roleTitle}</p>
+                    <p className="mt-1 text-sm text-slate-500">{job.company}</p>
+                    <p className="mt-3 text-sm font-medium text-slate-700">{job.location}</p>
+                  </Link>
+                ))
+              ) : (
+                <p className="rounded-md border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+                  No saved jobs yet. Add a role from the Job Tracker.
+                </p>
+              )}
             </div>
           </Card>
         </section>

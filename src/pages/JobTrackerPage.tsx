@@ -1,14 +1,22 @@
-import { Plus, Search } from 'lucide-react'
+import { LayoutGrid, List, Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { PageHeader } from '../components/ui/PageHeader'
+import { AddJobModal } from '../features/jobs/AddJobModal'
+import { JobBoard } from '../features/jobs/JobBoard'
 import { JobStatusFilter } from '../features/jobs/JobStatusFilter'
 import { JobTable } from '../features/jobs/JobTable'
-import { jobs } from '../mock'
+import { useWorkspace } from '../features/workspace/WorkspaceProvider'
 import type { JobStatus } from '../types'
+import { cn } from '../utils/classNames'
+
+type TrackerView = 'table' | 'board'
 
 export function JobTrackerPage() {
+  const { addJob, jobs, updateJobStatus } = useWorkspace()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<JobStatus | 'all'>('all')
+  const [view, setView] = useState<TrackerView>('table')
+  const [isAddJobOpen, setIsAddJobOpen] = useState(false)
 
   const filteredJobs = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -24,7 +32,7 @@ export function JobTrackerPage() {
 
       return matchesStatus && matchesQuery
     })
-  }, [query, status])
+  }, [jobs, query, status])
 
   return (
     <>
@@ -32,6 +40,7 @@ export function JobTrackerPage() {
         actions={
           <button
             className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+            onClick={() => setIsAddJobOpen(true)}
             type="button"
           >
             <Plus className="size-4" aria-hidden="true" />
@@ -56,8 +65,36 @@ export function JobTrackerPage() {
           <JobStatusFilter onChange={setStatus} value={status} />
         </div>
 
-        <JobTable jobs={filteredJobs} />
+        <div className="flex justify-end">
+          <div className="inline-flex rounded-md border border-slate-200 bg-white p-1 shadow-sm">
+            {[
+              { id: 'table' as const, label: 'Table', icon: List },
+              { id: 'board' as const, label: 'Board', icon: LayoutGrid },
+            ].map((item) => (
+              <button
+                className={cn(
+                  'inline-flex items-center gap-2 rounded px-3 py-1.5 text-sm font-medium transition',
+                  view === item.id ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950',
+                )}
+                key={item.id}
+                onClick={() => setView(item.id)}
+                type="button"
+              >
+                <item.icon className="size-4" aria-hidden="true" />
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {view === 'table' ? (
+          <JobTable jobs={filteredJobs} onStatusChange={updateJobStatus} />
+        ) : (
+          <JobBoard jobs={filteredJobs} onStatusChange={updateJobStatus} />
+        )}
       </div>
+
+      <AddJobModal isOpen={isAddJobOpen} onClose={() => setIsAddJobOpen(false)} onSubmit={addJob} />
     </>
   )
 }

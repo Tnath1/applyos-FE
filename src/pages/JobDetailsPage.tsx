@@ -5,11 +5,14 @@ import { Card } from '../components/ui/Card'
 import { PageHeader } from '../components/ui/PageHeader'
 import { JobStatusBadge } from '../components/ui/StatusBadge'
 import { JobDetailSidePanel } from '../features/jobs/JobDetailSidePanel'
-import { jobs, notes, reminders, resumes } from '../mock'
+import { JobStatusSelect } from '../features/jobs/JobStatusSelect'
+import { useWorkspace } from '../features/workspace/WorkspaceProvider'
+import { notes, reminders, resumes } from '../mock'
 import { formatDate } from '../utils/format'
 
 export function JobDetailsPage() {
   const { id } = useParams()
+  const { jobs, updateJobStatus } = useWorkspace()
   const job = jobs.find((item) => item.id === id)
 
   if (!job) {
@@ -64,6 +67,7 @@ export function JobDetailsPage() {
                   <Badge tone={job.priority === 'High' ? 'red' : job.priority === 'Medium' ? 'amber' : 'neutral'}>
                     {job.priority} priority
                   </Badge>
+                  <JobStatusSelect onChange={(status) => updateJobStatus(job.id, status)} value={job.status} />
                 </div>
                 <h2 className="mt-4 text-2xl font-semibold tracking-tight text-slate-950">{job.company}</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">{job.lastActivity}</p>
