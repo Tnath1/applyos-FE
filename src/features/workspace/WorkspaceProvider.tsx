@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { activityTimeline as initialActivity, jobs as initialJobs, resumes as initialResumes } from '../../mock'
-import type { ActivityTimelineItem, DashboardStat, Job, JobStatus, Resume } from '../../types'
+import { activityTimeline as initialActivity, jobs as initialJobs, notes as initialNotes, resumes as initialResumes } from '../../mock'
+import type { ActivityTimelineItem, DashboardStat, Job, JobStatus, Note, Resume } from '../../types'
 import { statusLabels } from '../../utils/format'
 
 interface NewJobInput {
@@ -27,13 +27,23 @@ interface NewResumeInput {
   keywords: string[]
 }
 
+interface NewNoteInput {
+  title: string
+  body: string
+  tags: string[]
+  jobId?: string
+}
+
 interface WorkspaceContextValue {
   jobs: Job[]
   resumes: Resume[]
+  notes: Note[]
   activityTimeline: ActivityTimelineItem[]
   dashboardStats: DashboardStat[]
   addJob: (input: NewJobInput) => Job
   addResume: (input: NewResumeInput) => Resume
+  addNote: (input: NewNoteInput) => Note
+  updateNote: (noteId: string, input: NewNoteInput) => void
   attachResumeToJob: (jobId: string, resumeId: string) => void
   updateJobStatus: (jobId: string, status: JobStatus) => void
 }
@@ -42,6 +52,7 @@ const WorkspaceContext = createContext<WorkspaceContextValue | null>(null)
 
 const jobsStorageKey = 'applyos.jobs.v1'
 const resumesStorageKey = 'applyos.resumes.v1'
+const notesStorageKey = 'applyos.notes.v1'
 const activityStorageKey = 'applyos.activity.v1'
 
 function today() {
@@ -126,6 +137,7 @@ function createDashboardStats(jobs: Job[]): DashboardStat[] {
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [jobs, setJobs] = useState<Job[]>(() => readStoredValue(jobsStorageKey, initialJobs))
   const [resumes, setResumes] = useState<Resume[]>(() => readStoredValue(resumesStorageKey, initialResumes))
+  const [notes, setNotes] = useState<Note[]>(() => readStoredValue(notesStorageKey, initialNotes))
   const [activityTimeline, setActivityTimeline] = useState<ActivityTimelineItem[]>(() =>
     readStoredValue(activityStorageKey, initialActivity),
   )
@@ -137,6 +149,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem(resumesStorageKey, JSON.stringify(resumes))
   }, [resumes])
+
+  useEffect(() => {
+    window.localStorage.setItem(notesStorageKey, JSON.stringify(notes))
+  }, [notes])
 
   useEffect(() => {
     window.localStorage.setItem(activityStorageKey, JSON.stringify(activityTimeline))
@@ -223,6 +239,114 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     return newResume
   }
 
+  function addNote(input: NewNoteInput) {
+    const createdAt = today()
+    const relatedJob = input.jobId ? jobs.find((job) => job.id === input.jobId) : undefined
+    const newNote: Note = {
+      id: createId('note'),
+      jobId: input.jobId,
+      title: input.title,
+      body: input.body,
+      createdAt,
+      tags: input.tags,
+    }
+
+    setNotes((currentNotes) => [newNote, ...currentNotes])
+    if (input.jobId) {
+      setJobs((currentJobs) =>
+        currentJobs.map((job) =>
+          job.id === input.jobId && !job.noteIds.includes(newNote.id)
+            ? {
+                ...job,
+                noteIds: [newNote.id, ...job.noteIds],
+                lastActivity: `Note updated on ${createdAt}`,
+              }
+            : job,
+        ),
+      )
+    }
+    setActivityTimeline((currentActivity) => [
+      {
+        id: createId('activity'),
+        type: 'note',
+        title: `${newNote.title} added`,
+        description: relatedJob
+          ? `A note was added for ${relatedJob.company} / ${relatedJob.roleTitle}.`
+          : 'A general note was added to the workspace.',
+        createdAt,
+        jobId: input.jobId,
+      },
+      ...currentActivity,
+    ])
+
+    return newNote
+  }
+
+  function updateNote(noteId: string, input: NewNoteInput) {
+    const existingNote = notes.find((note) => note.id === noteId)
+
+    if (!existingNote) {
+      return
+    }
+
+    const updatedAt = today()
+    const nextJobId = input.jobId
+    const previousJobId = existingNote.jobId
+    const relatedJob = nextJobId ? jobs.find((job) => job.id === nextJobId) : undefined
+
+    setNotes((currentNotes) =>
+      currentNotes.map((note) =>
+        note.id === noteId
+          ? {
+              ...note,
+              title: input.title,
+              body: input.body,
+              jobId: nextJobId,
+              tags: input.tags,
+            }
+          : note,
+      ),
+    )
+
+    setJobs((currentJobs) =>
+      currentJobs.map((job) => {
+        const removedFromPreviousJob =
+          previousJobId && job.id === previousJobId
+            ? {
+                ...job,
+                noteIds: job.noteIds.filter((id) => id !== noteId),
+              }
+            : job
+
+        if (nextJobId && removedFromPreviousJob.id === nextJobId) {
+          return {
+            ...removedFromPreviousJob,
+            noteIds: removedFromPreviousJob.noteIds.includes(noteId)
+              ? removedFromPreviousJob.noteIds
+              : [noteId, ...removedFromPreviousJob.noteIds],
+            lastActivity: `Note updated on ${updatedAt}`,
+          }
+        }
+
+        return removedFromPreviousJob
+      }),
+    )
+
+    setActivityTimeline((currentActivity) => [
+      {
+        id: createId('activity'),
+        type: 'note',
+        title: `${input.title} updated`,
+        description: relatedJob
+          ? `A note was updated for ${relatedJob.company} / ${relatedJob.roleTitle}.`
+          : 'A general note was updated in the workspace.',
+        createdAt: updatedAt,
+        jobId: nextJobId,
+      },
+      ...currentActivity,
+    ])
+  }
+
   function attachResumeToJob(jobId: string, resumeId: string) {
     const jobToUpdate = jobs.find((job) => job.id === jobId)
     const resumeToAttach = resumes.find((resume) => resume.id === resumeId)
@@ -294,8 +418,20 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   }
 
   const value = useMemo(
-    () => ({ jobs, resumes, activityTimeline, dashboardStats, addJob, addResume, attachResumeToJob, updateJobStatus }),
-    [activityTimeline, dashboardStats, jobs, resumes],
+    () => ({
+      jobs,
+      resumes,
+      notes,
+      activityTimeline,
+      dashboardStats,
+      addJob,
+      addResume,
+      addNote,
+      updateNote,
+      attachResumeToJob,
+      updateJobStatus,
+    }),
+    [activityTimeline, dashboardStats, jobs, notes, resumes],
   )
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>

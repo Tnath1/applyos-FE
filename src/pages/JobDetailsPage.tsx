@@ -1,17 +1,21 @@
 import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Badge } from '../components/ui/Badge'
 import { Card } from '../components/ui/Card'
 import { PageHeader } from '../components/ui/PageHeader'
 import { JobStatusBadge } from '../components/ui/StatusBadge'
 import { JobDetailSidePanel } from '../features/jobs/JobDetailSidePanel'
+import { AddNoteModal } from '../features/notes/AddNoteModal'
 import { useWorkspace } from '../features/workspace/WorkspaceProvider'
-import { notes, reminders } from '../mock'
+import type { Note } from '../types'
 import { formatDate } from '../utils/format'
 
 export function JobDetailsPage() {
   const { id } = useParams()
-  const { attachResumeToJob, jobs, resumes } = useWorkspace()
+  const { addNote, attachResumeToJob, jobs, notes, resumes, updateNote } = useWorkspace()
+  const [isAddNoteOpen, setIsAddNoteOpen] = useState(false)
+  const [editingNote, setEditingNote] = useState<Note | undefined>()
   const job = jobs.find((item) => item.id === id)
 
   if (!job) {
@@ -28,8 +32,7 @@ export function JobDetailsPage() {
   }
 
   const attachedResume = resumes.find((resume) => resume.id === job.resumeId)
-  const jobNotes = notes.filter((note) => job.noteIds.includes(note.id))
-  const jobReminders = reminders.filter((reminder) => job.reminderIds.includes(reminder.id))
+  const jobNotes = notes.filter((note) => note.jobId === job.id)
 
   return (
     <>
@@ -141,12 +144,32 @@ export function JobDetailsPage() {
         <JobDetailSidePanel
           job={job}
           notes={jobNotes}
+          onAddNote={() => {
+            setEditingNote(undefined)
+            setIsAddNoteOpen(true)
+          }}
+          onEditNote={(note) => {
+            setEditingNote(note)
+            setIsAddNoteOpen(true)
+          }}
           onResumeChange={(resumeId) => attachResumeToJob(job.id, resumeId)}
-          reminders={jobReminders}
           resume={attachedResume}
           resumes={resumes}
         />
       </div>
+
+      <AddNoteModal
+        initialJobId={job.id}
+        initialNote={editingNote}
+        isOpen={isAddNoteOpen}
+        jobs={jobs}
+        onClose={() => {
+          setIsAddNoteOpen(false)
+          setEditingNote(undefined)
+        }}
+        onSubmit={addNote}
+        onUpdate={updateNote}
+      />
     </>
   )
 }
