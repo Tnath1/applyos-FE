@@ -79,7 +79,7 @@ export function ResumesPage() {
               <Upload className="size-5" aria-hidden="true" />
             </span>
             <h2 className="mt-4 font-semibold text-slate-950">Upload resume</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">PDF and DOCX variants can be attached to tracked roles.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">PDF, DOC, and DOCX variants can be attached to tracked roles.</p>
             <button
               className="mt-5 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
               onClick={() => setIsAddResumeOpen(true)}

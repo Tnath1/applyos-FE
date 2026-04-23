@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { useState } from 'react'
+import { SelectMenu } from '../../components/ui/SelectMenu'
 import type { Job } from '../../types'
 
 interface AddJobModalProps {
@@ -32,6 +33,18 @@ const emptyForm = {
   description: '',
 }
 
+const workplaceOptions: Array<{ label: string; value: Job['workplace'] }> = [
+  { label: 'Remote', value: 'Remote' },
+  { label: 'Hybrid', value: 'Hybrid' },
+  { label: 'On-site', value: 'On-site' },
+]
+
+const priorityOptions: Array<{ label: string; value: Job['priority'] }> = [
+  { label: 'Low', value: 'Low' },
+  { label: 'Medium', value: 'Medium' },
+  { label: 'High', value: 'High' },
+]
+
 export function AddJobModal({ isOpen, onClose, onSubmit }: AddJobModalProps) {
   const [form, setForm] = useState(emptyForm)
 
@@ -60,8 +73,9 @@ export function AddJobModal({ isOpen, onClose, onSubmit }: AddJobModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-white shadow-xl">
+        <div className="shrink-0 border-b border-slate-200 px-5 py-4">
+          <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="text-base font-semibold text-slate-950">Add saved job</h2>
             <p className="mt-1 text-sm text-slate-500">New jobs start in Saved until you apply.</p>
@@ -74,9 +88,11 @@ export function AddJobModal({ isOpen, onClose, onSubmit }: AddJobModalProps) {
           >
             <X className="size-4" aria-hidden="true" />
           </button>
+          </div>
         </div>
 
-        <form className="space-y-4 p-5" onSubmit={handleSubmit}>
+        <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
               <span className="text-sm font-medium text-slate-700">Role title</span>
@@ -107,15 +123,13 @@ export function AddJobModal({ isOpen, onClose, onSubmit }: AddJobModalProps) {
             </label>
             <label className="block">
               <span className="text-sm font-medium text-slate-700">Workplace</span>
-              <select
-                className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200/60"
-                onChange={(event) => updateField('workplace', event.target.value)}
+              <SelectMenu
+                className="mt-1"
+                label="Workplace"
+                onChange={(value) => updateField('workplace', value)}
+                options={workplaceOptions}
                 value={form.workplace}
-              >
-                <option value="Remote">Remote</option>
-                <option value="Hybrid">Hybrid</option>
-                <option value="On-site">On-site</option>
-              </select>
+              />
             </label>
             <label className="block">
               <span className="text-sm font-medium text-slate-700">Source</span>
@@ -138,15 +152,13 @@ export function AddJobModal({ isOpen, onClose, onSubmit }: AddJobModalProps) {
             </label>
             <label className="block">
               <span className="text-sm font-medium text-slate-700">Priority</span>
-              <select
-                className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200/60"
-                onChange={(event) => updateField('priority', event.target.value)}
+              <SelectMenu
+                className="mt-1"
+                label="Priority"
+                onChange={(value) => updateField('priority', value)}
+                options={priorityOptions}
                 value={form.priority}
-              >
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-              </select>
+              />
             </label>
           </div>
 
@@ -178,8 +190,9 @@ export function AddJobModal({ isOpen, onClose, onSubmit }: AddJobModalProps) {
               value={form.description}
             />
           </label>
+          </div>
 
-          <div className="flex justify-end gap-2 border-t border-slate-200 pt-4">
+          <div className="flex shrink-0 justify-end gap-2 border-t border-slate-200 bg-white p-5">
             <button
               className="rounded-md border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               onClick={onClose}

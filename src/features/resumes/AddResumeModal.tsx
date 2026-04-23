@@ -9,6 +9,9 @@ interface AddResumeModalProps {
     name: string
     roleFocus: string
     fileType: Resume['fileType']
+    fileName: string
+    fileDataUrl: string
+    fileMimeType: string
     version: string
     keywords: string[]
   }) => void
@@ -18,6 +21,9 @@ const emptyForm = {
   name: '',
   roleFocus: '',
   fileType: 'PDF' as Resume['fileType'],
+  fileName: '',
+  fileDataUrl: '',
+  fileMimeType: '',
   version: 'v1.0',
   keywords: '',
 }
@@ -31,6 +37,45 @@ export function AddResumeModal({ isOpen, onClose, onSubmit }: AddResumeModalProp
 
   function updateField(field: keyof typeof form, value: string) {
     setForm((currentForm) => ({ ...currentForm, [field]: value }))
+  }
+
+  function getFileType(file: File): Resume['fileType'] {
+    const extension = file.name.split('.').pop()?.toLowerCase()
+
+    if (extension === 'doc') {
+      return 'DOC'
+    }
+
+    if (extension === 'docx') {
+      return 'DOCX'
+    }
+
+    return 'PDF'
+  }
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+
+    if (!file) {
+      return
+    }
+
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      const fileNameWithoutExtension = file.name.replace(/\.[^/.]+$/, '')
+
+      setForm((currentForm) => ({
+        ...currentForm,
+        name: currentForm.name || fileNameWithoutExtension,
+        fileType: getFileType(file),
+        fileName: file.name,
+        fileDataUrl: String(reader.result),
+        fileMimeType: file.type || 'application/octet-stream',
+      }))
+    }
+
+    reader.readAsDataURL(file)
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -67,6 +112,20 @@ export function AddResumeModal({ isOpen, onClose, onSubmit }: AddResumeModalProp
         </div>
 
         <form className="space-y-4 p-5" onSubmit={handleSubmit}>
+          <label className="block rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
+            <span className="text-sm font-medium text-slate-700">Resume file</span>
+            <input
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              className="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-slate-800"
+              onChange={handleFileChange}
+              required
+              type="file"
+            />
+            <p className="mt-2 text-xs text-slate-500">
+              {form.fileName ? `${form.fileName} selected` : 'Upload a PDF, DOC, or DOCX file.'}
+            </p>
+          </label>
+
           <label className="block">
             <span className="text-sm font-medium text-slate-700">Resume name</span>
             <input
@@ -88,28 +147,6 @@ export function AddResumeModal({ isOpen, onClose, onSubmit }: AddResumeModalProp
               value={form.roleFocus}
             />
           </label>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">File type</span>
-              <select
-                className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200/60"
-                onChange={(event) => updateField('fileType', event.target.value)}
-                value={form.fileType}
-              >
-                <option value="PDF">PDF</option>
-                <option value="DOCX">DOCX</option>
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Version</span>
-              <input
-                className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200/60"
-                onChange={(event) => updateField('version', event.target.value)}
-                value={form.version}
-              />
-            </label>
-          </div>
 
           <label className="block">
             <span className="text-sm font-medium text-slate-700">Keywords</span>

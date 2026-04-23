@@ -13,6 +13,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { cn } from '../utils/classNames'
 
 interface NavItem {
+  disabled?: boolean
   label: string
   to: string
   icon: LucideIcon
@@ -22,7 +23,7 @@ const navItems: NavItem[] = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
   { label: 'Job Tracker', to: '/jobs', icon: BriefcaseBusiness },
   { label: 'My Resumes', to: '/resumes', icon: FileText },
-  { label: 'Reminders', to: '/reminders', icon: Bell },
+  { label: 'Reminders', to: '/reminders', icon: Bell, disabled: true },
   { label: 'Notes', to: '/notes', icon: NotebookPen },
   { label: 'Settings', to: '/settings', icon: Settings },
 ]
@@ -31,22 +32,40 @@ function NavigationList({ mobile = false }: { mobile?: boolean }) {
   return (
     <nav className={cn(mobile ? 'flex gap-1 overflow-x-auto px-3 pb-3' : 'space-y-1 px-3')}>
       {navItems.map((item) => (
-        <NavLink
-          className={({ isActive }) =>
-            cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition',
+        item.disabled ? (
+          <div
+            className={cn(
+              'flex items-center justify-between gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-400',
               mobile && 'shrink-0',
-              isActive
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950',
-            )
-          }
-          key={item.to}
-          to={item.to}
-        >
-          <item.icon className="size-4" aria-hidden="true" />
-          <span>{item.label}</span>
-        </NavLink>
+            )}
+            key={item.to}
+          >
+            <div className="flex items-center gap-3">
+              <item.icon className="size-4" aria-hidden="true" />
+              <span>{item.label}</span>
+            </div>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+              Soon
+            </span>
+          </div>
+        ) : (
+          <NavLink
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition',
+                mobile && 'shrink-0',
+                isActive
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950',
+              )
+            }
+            key={item.to}
+            to={item.to}
+          >
+            <item.icon className="size-4" aria-hidden="true" />
+            <span>{item.label}</span>
+          </NavLink>
+        )
       ))}
     </nav>
   )

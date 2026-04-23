@@ -1,17 +1,21 @@
-import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin, Star } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Badge } from '../components/ui/Badge'
 import { Card } from '../components/ui/Card'
 import { PageHeader } from '../components/ui/PageHeader'
 import { JobStatusBadge } from '../components/ui/StatusBadge'
 import { JobDetailSidePanel } from '../features/jobs/JobDetailSidePanel'
+import { AddNoteModal } from '../features/notes/AddNoteModal'
 import { useWorkspace } from '../features/workspace/WorkspaceProvider'
-import { notes, reminders } from '../mock'
+import type { Note } from '../types'
 import { formatDate } from '../utils/format'
 
 export function JobDetailsPage() {
   const { id } = useParams()
-  const { attachResumeToJob, jobs, resumes } = useWorkspace()
+  const { addNote, attachResumeToJob, jobs, notes, resumes, updateNote } = useWorkspace()
+  const [isAddNoteOpen, setIsAddNoteOpen] = useState(false)
+  const [editingNote, setEditingNote] = useState<Note | undefined>()
   const job = jobs.find((item) => item.id === id)
 
   if (!job) {
@@ -28,8 +32,7 @@ export function JobDetailsPage() {
   }
 
   const attachedResume = resumes.find((resume) => resume.id === job.resumeId)
-  const jobNotes = notes.filter((note) => job.noteIds.includes(note.id))
-  const jobReminders = reminders.filter((reminder) => job.reminderIds.includes(reminder.id))
+  const jobNotes = notes.filter((note) => note.jobId === job.id)
 
   return (
     <>
@@ -70,7 +73,7 @@ export function JobDetailsPage() {
                 <h2 className="mt-4 text-2xl font-semibold tracking-tight text-slate-950">{job.company}</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">{job.lastActivity}</p>
               </div>
-              <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-3 lg:text-right">
+              <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-2 lg:text-right">
                 <div>
                   <p className="font-medium text-slate-950">Applied</p>
                   <p className="mt-1">{formatDate(job.appliedDate)}</p>
@@ -78,13 +81,6 @@ export function JobDetailsPage() {
                 <div>
                   <p className="font-medium text-slate-950">Compensation</p>
                   <p className="mt-1">{job.salaryRange}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-slate-950">Rating</p>
-                  <p className="mt-1 inline-flex items-center gap-1 lg:justify-end">
-                    <Star className="size-4 fill-amber-300 text-amber-300" aria-hidden="true" />
-                    {job.rating}/5
-                  </p>
                 </div>
               </div>
             </div>
@@ -148,12 +144,32 @@ export function JobDetailsPage() {
         <JobDetailSidePanel
           job={job}
           notes={jobNotes}
+          onAddNote={() => {
+            setEditingNote(undefined)
+            setIsAddNoteOpen(true)
+          }}
+          onEditNote={(note) => {
+            setEditingNote(note)
+            setIsAddNoteOpen(true)
+          }}
           onResumeChange={(resumeId) => attachResumeToJob(job.id, resumeId)}
-          reminders={jobReminders}
           resume={attachedResume}
           resumes={resumes}
         />
       </div>
+
+      <AddNoteModal
+        initialJobId={job.id}
+        initialNote={editingNote}
+        isOpen={isAddNoteOpen}
+        jobs={jobs}
+        onClose={() => {
+          setIsAddNoteOpen(false)
+          setEditingNote(undefined)
+        }}
+        onSubmit={addNote}
+        onUpdate={updateNote}
+      />
     </>
   )
 }

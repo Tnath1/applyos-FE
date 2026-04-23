@@ -1,8 +1,9 @@
 import { Pin } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import type { Note } from '../../types'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
-import { jobs } from '../../mock'
+import { useWorkspace } from '../workspace/WorkspaceProvider'
 import { formatDate } from '../../utils/format'
 
 interface NoteCardProps {
@@ -10,6 +11,7 @@ interface NoteCardProps {
 }
 
 export function NoteCard({ note }: NoteCardProps) {
+  const { jobs } = useWorkspace()
   const job = jobs.find((item) => item.id === note.jobId)
 
   return (
@@ -20,7 +22,13 @@ export function NoteCard({ note }: NoteCardProps) {
             <h3 className="font-semibold text-slate-950">{note.title}</h3>
             {note.pinned ? <Pin className="size-4 fill-amber-300 text-amber-500" aria-hidden="true" /> : null}
           </div>
-          <p className="mt-1 text-sm text-slate-500">{job ? `${job.company} / ${job.roleTitle}` : 'General'}</p>
+          {job ? (
+            <Link className="mt-1 block text-sm text-slate-500 hover:text-blue-700" to={`/jobs/${job.id}`}>
+              {job.company} / {job.roleTitle}
+            </Link>
+          ) : (
+            <p className="mt-1 text-sm text-slate-500">General</p>
+          )}
         </div>
         <span className="text-xs text-slate-500">{formatDate(note.createdAt)}</span>
       </div>
