@@ -53,6 +53,7 @@ export const settings: WorkspaceSettings = {
     renewalDate: '2026-05-14',
     seats: 1,
     features: ['Job tracking', 'Resume library', 'Notes workspace'],
+    billingDetails: undefined,
   },
   integrations: [
     {

@@ -55,11 +55,17 @@ export interface SecuritySettings {
 
 export interface SubscriptionSettings {
   plan: 'Free' | 'Pro'
-  billingCycle: 'monthly' | 'annual'
+  billingCycle: 'monthly'
   status: 'trialing' | 'active'
   renewalDate: string
   seats: number
   features: string[]
+  billingDetails?: {
+    cardholderName: string
+    billingEmail: string
+    country: string
+    cardLast4: string
+  }
 }
 
 export interface IntegrationStatus {

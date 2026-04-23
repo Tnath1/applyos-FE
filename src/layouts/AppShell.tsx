@@ -16,6 +16,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { Badge } from '../components/ui/Badge'
+import { SearchableSelect } from '../components/ui/SearchableSelect'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import { useWorkspace } from '../features/workspace/WorkspaceProvider'
 import { cn } from '../utils/classNames'
@@ -35,6 +36,26 @@ const navItems: NavItem[] = [
   { label: 'Reminders', to: '/reminders', icon: Bell, disabled: true },
   { label: 'Settings', to: '/settings', icon: Settings, disabled: true },
 ]
+
+const countryOptions = [
+  'Australia',
+  'Canada',
+  'France',
+  'Germany',
+  'Ghana',
+  'India',
+  'Ireland',
+  'Kenya',
+  'Netherlands',
+  'Nigeria',
+  'South Africa',
+  'United Arab Emirates',
+  'United Kingdom',
+  'United States',
+].map((country) => ({
+  label: country,
+  value: country,
+}))
 
 function NavigationList({ mobile = false }: { mobile?: boolean }) {
   return (
@@ -88,7 +109,6 @@ export function AppShell() {
     cardNumber: '',
     expiry: '',
     cvc: '',
-    billingCycle: 'annual' as 'monthly' | 'annual',
     country: 'United States',
   })
   const fullName = useMemo(() => `${profile.firstName} ${profile.lastName}`.trim(), [profile.firstName, profile.lastName])
@@ -132,11 +152,17 @@ export function AppShell() {
 
     updateSubscription({
       plan: 'Pro',
-      billingCycle: billingForm.billingCycle,
+      billingCycle: 'monthly',
       status: 'active',
       renewalDate: subscription.renewalDate,
       seats: 1,
       features: ['Unlimited jobs', 'Resume library', 'Notes workspace', 'Priority support'],
+      billingDetails: {
+        cardholderName: billingForm.cardholderName,
+        billingEmail: billingForm.billingEmail,
+        country: billingForm.country,
+        cardLast4: billingForm.cardNumber.slice(-4),
+      },
     })
     setIsBillingOpen(false)
   }
@@ -232,9 +258,9 @@ export function AppShell() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-slate-950">Current plan</p>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {subscription.plan === 'Free' ? 'Free mode' : `Pro on ${subscription.billingCycle}`}
-                      </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {subscription.plan === 'Free' ? 'Free mode' : 'Pro on monthly billing'}
+                  </p>
                     </div>
                     <Badge tone={subscription.plan === 'Pro' ? 'blue' : 'neutral'}>
                       {subscription.plan === 'Pro' ? 'Pro' : 'Free mode'}
@@ -252,6 +278,11 @@ export function AppShell() {
                       <Sparkles className="size-4" aria-hidden="true" />
                       Upgrade to Pro
                     </button>
+                  ) : null}
+                  {subscription.plan === 'Pro' && subscription.billingDetails ? (
+                    <div className="mt-4 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600">
+                      Billing saved for {subscription.billingDetails.billingEmail} with card ending in {subscription.billingDetails.cardLast4}.
+                    </div>
                   ) : null}
                 </section>
 
@@ -328,7 +359,7 @@ export function AppShell() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Billing</p>
                   <h2 className="mt-2 text-lg font-semibold text-slate-950">Upgrade to Pro</h2>
-                  <p className="mt-1 text-sm text-slate-500">Add billing details to move this workspace from Free mode to Pro.</p>
+                  <p className="mt-1 text-sm text-slate-500">Add billing details to upgrade this workspace to Pro on a monthly plan.</p>
                 </div>
                 <button
                   aria-label="Close billing modal"
@@ -377,10 +408,12 @@ export function AppShell() {
                 <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_120px_100px]">
                   <label className="block">
                     <span className="text-sm font-medium text-slate-700">Country</span>
-                    <input
-                      className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200/60"
-                      onChange={(event) => setBillingForm((current) => ({ ...current, country: event.target.value }))}
-                      required
+                    <SearchableSelect
+                      className="mt-1"
+                      label="Country"
+                      onChange={(value) => setBillingForm((current) => ({ ...current, country: value }))}
+                      options={countryOptions}
+                      searchPlaceholder="Search country"
                       value={billingForm.country}
                     />
                   </label>
@@ -407,31 +440,10 @@ export function AppShell() {
                   </label>
                 </div>
 
-                <div>
-                  <span className="text-sm font-medium text-slate-700">Billing cycle</span>
-                  <div className="mt-2 grid grid-cols-2 gap-2">
-                    {(['monthly', 'annual'] as const).map((cycle) => (
-                      <button
-                        className={cn(
-                          'rounded-md border px-3 py-2 text-sm font-medium transition',
-                          billingForm.billingCycle === cycle
-                            ? 'border-slate-900 bg-slate-900 text-white'
-                            : 'border-slate-200 text-slate-600 hover:bg-slate-50',
-                        )}
-                        key={cycle}
-                        onClick={() => setBillingForm((current) => ({ ...current, billingCycle: cycle }))}
-                        type="button"
-                      >
-                        {cycle === 'monthly' ? 'Monthly' : 'Annual'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
                   <div className="flex items-center gap-2">
                     <CreditCard className="size-4 text-slate-400" aria-hidden="true" />
-                    Your plan will upgrade to Pro after billing details are saved.
+                    Billing details will be saved to this account for monthly renewal.
                   </div>
                 </div>
 
