@@ -1,4 +1,5 @@
 import { CalendarDays, FileText, Mail, NotebookText } from 'lucide-react'
+import { SelectMenu } from '../../components/ui/SelectMenu'
 import type { Job, Note, Reminder, Resume } from '../../types'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
@@ -15,6 +16,14 @@ interface JobDetailSidePanelProps {
 }
 
 export function JobDetailSidePanel({ job, resume, resumes = [], notes, reminders, onResumeChange }: JobDetailSidePanelProps) {
+  const resumeOptions = [
+    { label: 'No resume selected', value: '' },
+    ...resumes.map((item) => ({
+      label: item.version ? `${item.name} (${item.version})` : item.name,
+      value: item.id,
+    })),
+  ]
+
   return (
     <aside className="space-y-4">
       <Card className="p-4">
@@ -39,19 +48,14 @@ export function JobDetailSidePanel({ job, resume, resumes = [], notes, reminders
             <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
               {resume ? 'Replace resume' : 'Attach resume'}
             </span>
-            <select
-              className="mt-2 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200/60"
+            <SelectMenu
+              className="mt-2"
               disabled={resumes.length === 0}
-              onChange={(event) => onResumeChange(event.target.value)}
+              label={resume ? 'Replace resume' : 'Attach resume'}
+              onChange={onResumeChange}
+              options={resumeOptions}
               value={job.resumeId}
-            >
-              <option value="">No resume selected</option>
-              {resumes.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name} ({item.version})
-                </option>
-              ))}
-            </select>
+            />
           </label>
         ) : null}
       </Card>

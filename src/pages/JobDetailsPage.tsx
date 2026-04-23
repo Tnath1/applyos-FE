@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin, Star } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { Badge } from '../components/ui/Badge'
 import { Card } from '../components/ui/Card'
@@ -70,7 +70,7 @@ export function JobDetailsPage() {
                 <h2 className="mt-4 text-2xl font-semibold tracking-tight text-slate-950">{job.company}</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">{job.lastActivity}</p>
               </div>
-              <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-3 lg:text-right">
+              <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-2 lg:text-right">
                 <div>
                   <p className="font-medium text-slate-950">Applied</p>
                   <p className="mt-1">{formatDate(job.appliedDate)}</p>
@@ -78,13 +78,6 @@ export function JobDetailsPage() {
                 <div>
                   <p className="font-medium text-slate-950">Compensation</p>
                   <p className="mt-1">{job.salaryRange}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-slate-950">Rating</p>
-                  <p className="mt-1 inline-flex items-center gap-1 lg:justify-end">
-                    <Star className="size-4 fill-amber-300 text-amber-300" aria-hidden="true" />
-                    {job.rating}/5
-                  </p>
                 </div>
               </div>
             </div>

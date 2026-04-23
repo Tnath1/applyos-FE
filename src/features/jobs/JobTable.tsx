@@ -1,4 +1,4 @@
-import { ArrowUpRight, CalendarDays, MapPin, Star } from 'lucide-react'
+import { ArrowUpRight, CalendarDays, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Job } from '../../types'
 import type { JobStatus } from '../../types'
@@ -40,7 +40,7 @@ export function JobTable({ emptyState, jobs, onStatusChange }: JobTableProps) {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {jobs.map((job) => (
-              <tr className="transition hover:bg-slate-50" key={job.id}>
+              <tr key={job.id}>
                 <td className="px-4 py-4">
                   <div className="font-medium text-slate-950">{job.roleTitle}</div>
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
@@ -61,15 +61,9 @@ export function JobTable({ emptyState, jobs, onStatusChange }: JobTableProps) {
                 </td>
                 <td className="px-4 py-4 text-sm text-slate-600">{formatDate(job.appliedDate)}</td>
                 <td className="px-4 py-4">
-                  <div className="flex items-center gap-2">
-                    <Badge tone={job.priority === 'High' ? 'red' : job.priority === 'Medium' ? 'amber' : 'neutral'}>
-                      {job.priority}
-                    </Badge>
-                    <span className="inline-flex items-center gap-1 text-sm text-slate-500">
-                      <Star className="size-3.5 fill-amber-300 text-amber-300" aria-hidden="true" />
-                      {job.rating}
-                    </span>
-                  </div>
+                  <Badge tone={job.priority === 'High' ? 'red' : job.priority === 'Medium' ? 'amber' : 'neutral'}>
+                    {job.priority}
+                  </Badge>
                 </td>
                 <td className="px-4 py-4 text-right">
                   <Link
