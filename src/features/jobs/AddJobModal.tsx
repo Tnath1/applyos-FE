@@ -13,6 +13,7 @@ interface AddJobModalProps {
     source: string
     sourceUrl: string
     salaryRange: string
+    priority: Job['priority']
     keywords: string[]
     description: string
   }) => void
@@ -26,6 +27,7 @@ const emptyForm = {
   source: '',
   sourceUrl: '',
   salaryRange: '',
+  priority: 'Medium' as Job['priority'],
   keywords: '',
   description: '',
 }
@@ -133,6 +135,18 @@ export function AddJobModal({ isOpen, onClose, onSubmit }: AddJobModalProps) {
                 type="url"
                 value={form.sourceUrl}
               />
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium text-slate-700">Priority</span>
+              <select
+                className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200/60"
+                onChange={(event) => updateField('priority', event.target.value)}
+                value={form.priority}
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
             </label>
           </div>
 

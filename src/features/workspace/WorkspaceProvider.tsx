@@ -11,6 +11,7 @@ interface NewJobInput {
   source: string
   sourceUrl: string
   salaryRange: string
+  priority: Job['priority']
   keywords: string[]
   description: string
 }
@@ -136,7 +137,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       source: input.source || 'Manual entry',
       sourceUrl: input.sourceUrl || '#',
       salaryRange: input.salaryRange || 'Not listed',
-      priority: 'Medium',
+      priority: input.priority,
       rating: 3,
       keywords: input.keywords,
       description:
