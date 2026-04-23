@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { SelectMenu } from '../../components/ui/SelectMenu'
 import type { Job, Note } from '../../types'
 
@@ -31,6 +32,7 @@ export function AddNoteModal({ initialJobId = '', initialNote, isOpen, jobs, onC
   const [body, setBody] = useState('')
   const [tags, setTags] = useState('')
   const [jobId, setJobId] = useState(initialJobId)
+  useBodyScrollLock(isOpen)
 
   const jobOptions = useMemo(
     () => [
