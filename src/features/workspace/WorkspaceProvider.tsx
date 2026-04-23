@@ -20,6 +20,9 @@ interface NewResumeInput {
   name: string
   roleFocus: string
   fileType: Resume['fileType']
+  fileName: string
+  fileDataUrl: string
+  fileMimeType: string
   version: string
   keywords: string[]
 }
@@ -196,6 +199,9 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       name: input.name,
       roleFocus: input.roleFocus,
       fileType: input.fileType,
+      fileName: input.fileName,
+      fileDataUrl: input.fileDataUrl,
+      fileMimeType: input.fileMimeType,
       updatedAt: createdAt,
       version: input.version || 'v1.0',
       matchScore: 80,

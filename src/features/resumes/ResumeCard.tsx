@@ -10,11 +10,31 @@ interface ResumeCardProps {
 
 export function ResumeCard({ jobs, resume }: ResumeCardProps) {
   const attachedJobs = jobs.filter((job) => job.resumeId === resume.id)
+  const resumeUrl = getResumeUrl(resume)
 
   return (
     <Card className="p-4">
-      <h3 className="font-semibold text-slate-950">{resume.name}</h3>
-      <p className="mt-1 text-sm leading-5 text-slate-500">{resume.roleFocus}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <a
+            className="font-semibold text-slate-950 hover:text-blue-700"
+            href={resumeUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {resume.name}
+          </a>
+        </div>
+        <a
+          className="shrink-0 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+          href={resumeUrl}
+          rel="noreferrer"
+          target="_blank"
+        >
+          View resume
+        </a>
+      </div>
+      <p className="mt-2 text-sm leading-5 text-slate-500">{resume.roleFocus}</p>
 
       <div className="mt-5">
         <h4 className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Used on jobs</h4>
@@ -47,4 +67,68 @@ export function ResumeCard({ jobs, resume }: ResumeCardProps) {
       </div>
     </Card>
   )
+}
+
+function getResumeUrl(resume: Resume) {
+  if (resume.fileDataUrl) {
+    return resume.fileDataUrl
+  }
+
+  const previewMarkup = `
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>${escapeHtml(resume.name)}</title>
+        <style>
+          body {
+            margin: 0;
+            background: #f8fafc;
+            color: #0f172a;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          }
+          main {
+            max-width: 760px;
+            margin: 48px auto;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+          }
+          h1 {
+            margin: 0;
+            font-size: 28px;
+            line-height: 1.2;
+          }
+          p {
+            color: #475569;
+            line-height: 1.7;
+          }
+          ul {
+            margin-top: 24px;
+            padding-left: 20px;
+            color: #334155;
+            line-height: 1.8;
+          }
+        </style>
+      </head>
+      <body>
+        <main>
+          <h1>${escapeHtml(resume.name)}</h1>
+          <p>${escapeHtml(resume.roleFocus)}</p>
+          <ul>
+            ${resume.keywords.map((keyword) => `<li>${escapeHtml(keyword)}</li>`).join('')}
+          </ul>
+        </main>
+      </body>
+    </html>
+  `
+
+  return `data:text/html;charset=utf-8,${encodeURIComponent(previewMarkup)}`
+}
+
+function escapeHtml(value: string) {
+  return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 }

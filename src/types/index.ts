@@ -16,7 +16,10 @@ export interface Resume {
   id: string
   name: string
   roleFocus: string
-  fileType: 'PDF' | 'DOCX'
+  fileType: 'PDF' | 'DOC' | 'DOCX'
+  fileName?: string
+  fileDataUrl?: string
+  fileMimeType?: string
   updatedAt: string
   version: string
   matchScore: number
