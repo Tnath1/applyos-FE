@@ -6,12 +6,12 @@ import { PageHeader } from '../components/ui/PageHeader'
 import { JobStatusBadge } from '../components/ui/StatusBadge'
 import { JobDetailSidePanel } from '../features/jobs/JobDetailSidePanel'
 import { useWorkspace } from '../features/workspace/WorkspaceProvider'
-import { notes, reminders, resumes } from '../mock'
+import { notes, reminders } from '../mock'
 import { formatDate } from '../utils/format'
 
 export function JobDetailsPage() {
   const { id } = useParams()
-  const { jobs } = useWorkspace()
+  const { attachResumeToJob, jobs, resumes } = useWorkspace()
   const job = jobs.find((item) => item.id === id)
 
   if (!job) {
@@ -145,7 +145,14 @@ export function JobDetailsPage() {
           </section>
         </Card>
 
-        <JobDetailSidePanel job={job} notes={jobNotes} reminders={jobReminders} resume={attachedResume} />
+        <JobDetailSidePanel
+          job={job}
+          notes={jobNotes}
+          onResumeChange={(resumeId) => attachResumeToJob(job.id, resumeId)}
+          reminders={jobReminders}
+          resume={attachedResume}
+          resumes={resumes}
+        />
       </div>
     </>
   )

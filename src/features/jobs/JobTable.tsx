@@ -5,14 +5,20 @@ import type { JobStatus } from '../../types'
 import { formatDate } from '../../utils/format'
 import { Badge } from '../../components/ui/Badge'
 import { JobStatusBadge } from '../../components/ui/StatusBadge'
+import { JobEmptyState } from './JobEmptyState'
 import { JobStatusSelect } from './JobStatusSelect'
 
 interface JobTableProps {
   jobs: Job[]
   onStatusChange?: (jobId: string, status: JobStatus) => void
+  emptyState?: React.ReactNode
 }
 
-export function JobTable({ jobs, onStatusChange }: JobTableProps) {
+export function JobTable({ emptyState, jobs, onStatusChange }: JobTableProps) {
+  if (jobs.length === 0) {
+    return emptyState ?? <JobEmptyState />
+  }
+
   return (
     <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
       <div className="hidden overflow-x-auto md:block">
