@@ -5,11 +5,13 @@ import { Card } from '../components/ui/Card'
 import { PageHeader } from '../components/ui/PageHeader'
 import { JobStatusBadge } from '../components/ui/StatusBadge'
 import { JobDetailSidePanel } from '../features/jobs/JobDetailSidePanel'
-import { jobs, notes, reminders, resumes } from '../mock'
+import { useWorkspace } from '../features/workspace/WorkspaceProvider'
+import { notes, reminders, resumes } from '../mock'
 import { formatDate } from '../utils/format'
 
 export function JobDetailsPage() {
   const { id } = useParams()
+  const { jobs } = useWorkspace()
   const job = jobs.find((item) => item.id === id)
 
   if (!job) {

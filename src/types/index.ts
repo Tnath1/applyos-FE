@@ -2,7 +2,7 @@ export type JobStatus = 'saved' | 'applied' | 'interviewing' | 'offer' | 'reject
 
 export type ReminderStatus = 'overdue' | 'upcoming' | 'completed'
 
-export type ActivityType = 'application' | 'resume' | 'note' | 'reminder' | 'interview'
+export type ActivityType = 'application' | 'resume' | 'note' | 'reminder' | 'interview' | 'status'
 
 export interface DashboardStat {
   id: string
@@ -64,7 +64,7 @@ export interface Job {
   location: string
   workplace: 'Remote' | 'Hybrid' | 'On-site'
   status: JobStatus
-  appliedDate: string
+  appliedDate: string | null
   source: string
   sourceUrl: string
   salaryRange: string
