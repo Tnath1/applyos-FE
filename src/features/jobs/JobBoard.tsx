@@ -17,6 +17,7 @@ import type { Job, JobStatus } from '../../types'
 import { cn } from '../../utils/classNames'
 import { formatShortDate, statusLabels } from '../../utils/format'
 
+
 interface JobBoardProps {
   jobs: Job[]
   onStatusChange: (jobId: string, status: JobStatus) => void
